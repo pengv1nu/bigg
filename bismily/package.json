@@ -1,0 +1,14 @@
+{
+	"name": "bismily",
+	"version": "0.0.0",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"dev": "vite",
+		"build": "vite build",
+		"preview": "vite preview"
+	},
+	"dependencies": {
+		"express": "^4.19.2"
+	}
+}
