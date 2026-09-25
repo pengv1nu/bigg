@@ -1,5 +1,6 @@
 const express = require("express");
 const corsMiddleware = require("./cors");
+const rateLimit = require("./middleware/rateLimit");
 
 const usersRouter = require("./routes/users");
 const productsRouter = require("./routes/products");
@@ -10,6 +11,8 @@ const PORT = process.env.PORT || 3000;
 
 app.use(corsMiddleware);
 app.use(express.json());
+
+app.use(rateLimit);
 
 app.use((req, res, next) => {
 	console.log(`${new Date().toISOString()} ${req.method} ${req.url}`);
