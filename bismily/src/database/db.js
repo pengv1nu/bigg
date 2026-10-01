@@ -1,18 +1,64 @@
-const db = {
-  products: [],
-  orders: [],
-  users: [],
+import { Sequelize, DataTypes } from "sequelize";
+import bcrypt from "bcryptjs";
 
-  _counters: {
-    products: 0,
-    orders: 0,
-    users: 0,
-  },
+const sequelize = new Sequelize({
+	dialect: "sqlite",
+	storage: "./database.sqlite",
+	logging: false,
+});
 
-  nextId(entity) {
-    this._counters[entity] += 1;
-    return this._counters[entity];
-  },
+const User = sequelize.define(
+	"User",
+	{
+		id: {
+			type: DataTypes.INTEGER,
+			primaryKey: true,
+			autoIncrement: true,
+		},
+		email: {
+			type: DataTypes.STRING,
+			allowNull: false,
+			unique: true,
+			validate: {
+				isEmail: {
+					msg: "Некорректный формат email",
+				},
+				notEmpty: {
+					msg: "Email не может быть пустым",
+				},
+			},
+		},
+		password: {
+			type: DataTypes.STRING,
+			allowNull: false,
+			validate: {
+				notEmpty: {
+					msg: "Пароль не может быть пустым",
+				},
+				len: {
+					args: [6, 100],
+					msg: "Пароль должен содержать от 6 до 100 символов",
+				},
+			},
+		},
+	},
+	{
+		hooks: {
+			beforeCreate: async (user) => {
+				if (user.password) {
+					user.password = await bcrypt.hash(user.password, 10);
+				}
+			},
+			beforeUpdate: async (user) => {
+				if (user.changed("password")) {
+					user.password = await bcrypt.hash(user.password, 10);
+				}
+			},
+		},
+	},
+);
+User.prototype.validPassword = async function (password) {
+	return await bcrypt.compare(password, this.password);
 };
 
-module.exports = db;
+export { User, sequelize };
